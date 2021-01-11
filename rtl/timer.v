@@ -61,7 +61,7 @@ module timer #(
 
     // Ensure that the timer is actively counting down if we've started it and it hasn't completed
     always @(*)
-        if (f_timer_running)
+        if (f_timer_running && !done)
             assert(counter > 0);
 
     // Ensure that done is only asserted if the counter is empty
