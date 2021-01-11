@@ -22,19 +22,26 @@ module timer #(
             counter <= counter - 1;
 
 `ifdef FORMAL
+    // Keep track of whether or not $past() is valid
     reg f_past_valid = 0;
     always @(posedge clk_i)
         f_past_valid <= 1;
 
     // Remember the number of cycles from "start" to "done", and what the last value of "count" was
-    reg [WIDTH:0] f_num_cycles;
-    reg [WIDTH-1:0] f_last_count;
+    reg [WIDTH:0] f_num_cycles = 0;
+    reg [WIDTH-1:0] f_last_count = 0;
     always @(posedge clk_i)
-        if (start) begin
+        if (rst_i) begin
+            f_num_cycles <= 0;
+            f_last_count <= 0;
+        end else if (start) begin
             f_num_cycles <= 0;
             f_last_count <= count;
-        end else begin
+        end else if (!done) begin
             f_num_cycles = f_num_cycles + 1;
+            f_last_count <= f_last_count;
+        end else begin
+            f_num_cycles = f_num_cycles;
             f_last_count <= f_last_count;
         end
 
@@ -52,8 +59,7 @@ module timer #(
 
     // Verify that the number of cycles from "start" to "done" matches what was requested
     always @(*)
-        if (done && f_timer_running)
-            assert(f_num_cycles == f_last_count);
+        assert(f_num_cycles == f_last_count-counter);
 
     // Make sure that the timer can run to completion
     always @(*)
