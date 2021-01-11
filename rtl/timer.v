@@ -64,10 +64,10 @@ module timer #(
         if (f_timer_running)
             assert(counter > 0);
 
-    // Ensure that done is only asserted if the timer is actively running
+    // Ensure that done is only asserted if the counter is empty
     always @(*)
         if (done)
-            assert(f_timer_running);
+            assert(counter == 0);
 
     // Generate a testbench that runs the timer for 25 cycles
     generate if (WIDTH >= 5)
