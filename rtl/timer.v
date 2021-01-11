@@ -38,11 +38,6 @@ module timer #(
             f_last_count <= f_last_count;
         end
 
-    // Verify that the number of cycles from "start" to "done" matches what was requested
-    always @(*)
-        if (done)
-            assert(f_num_cycles == f_last_count);
-
     // Keep track of whether or not the timer is running
     reg f_timer_running = 0;
     always @(posedge clk_i)
@@ -54,6 +49,11 @@ module timer #(
             f_timer_running <= 0;
         else
             f_timer_running <= f_timer_running;
+
+    // Verify that the number of cycles from "start" to "done" matches what was requested
+    always @(*)
+        if (done && f_timer_running)
+            assert(f_num_cycles == f_last_count);
 
     // Make sure that the timer can run to completion
     always @(*)
