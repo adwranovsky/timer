@@ -5,18 +5,18 @@ module timer #(
 ) (
     input wire clk_i,
     input wire rst_i,
-    input wire start,
-    input wire [WIDTH-1:0] count,
-    output wire done
+    input wire start_i,
+    input wire [WIDTH-1:0] count_i,
+    output wire done_o
 );
     reg [WIDTH-1:0] counter = 0;
-    assign done = counter == 0;
+    assign done_o = counter == 0;
     always @(posedge clk_i)
         if (rst_i)
             counter <= 0;
-        else if (start)
-            counter <= count;
-        else if (done)
+        else if (start_i)
+            counter <= count_i;
+        else if (done_o)
             counter <= 0;
         else
             counter <= counter - 1;
@@ -27,17 +27,17 @@ module timer #(
     always @(posedge clk_i)
         f_past_valid <= 1;
 
-    // Remember the number of cycles from "start" to "done", and what the last value of "count" was
+    // Remember the number of cycles from "start_i" to "done_o", and what the last value of "count_i" was
     reg [WIDTH:0] f_num_cycles = 0;
     reg [WIDTH-1:0] f_last_count = 0;
     always @(posedge clk_i)
         if (rst_i) begin
             f_num_cycles <= 0;
             f_last_count <= 0;
-        end else if (start) begin
+        end else if (start_i) begin
             f_num_cycles <= 0;
-            f_last_count <= count;
-        end else if (!done) begin
+            f_last_count <= count_i;
+        end else if (!done_o) begin
             f_num_cycles = f_num_cycles + 1;
             f_last_count <= f_last_count;
         end else begin
@@ -50,35 +50,35 @@ module timer #(
     always @(posedge clk_i)
         if (rst_i)
             f_timer_running <= 0;
-        else if (start)
+        else if (start_i)
             f_timer_running <= 1;
-        else if (done)
+        else if (done_o)
             f_timer_running <= 0;
         else
             f_timer_running <= f_timer_running;
 
-    // Verify that the number of cycles from "start" to "done" matches what was requested
+    // Verify that the number of cycles from "start_i" to "done_o" matches what was requested
     always @(*)
         assert(f_num_cycles == f_last_count-counter);
 
     // Make sure that the timer can run to completion
     always @(*)
-        cover(f_timer_running && done);
+        cover(f_timer_running && done_o);
 
     // Ensure that the timer is actively counting down if we've started it and it hasn't completed
     always @(*)
-        if (f_timer_running && !done)
+        if (f_timer_running && !done_o)
             assert(counter > 0);
 
-    // Ensure that done is only asserted if the counter is empty
+    // Ensure that done_o is only asserted if the counter is empty
     always @(*)
-        if (done)
+        if (done_o)
             assert(counter == 0);
 
     // Generate a testbench that runs the timer for 25 cycles
     generate if (WIDTH >= 5)
         always @(*)
-            cover(f_num_cycles==25 && done);
+            cover(f_num_cycles==25 && done_o);
     endgenerate
 `endif
 
