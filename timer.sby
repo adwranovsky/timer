@@ -22,7 +22,8 @@ smtbmc
 
 [script]
 read -formal timer.v
+chparam -set COVER 1 timer
 prep -top timer
 
 [files]
-../src/adwranovsky__timer_0.1/rtl/timer.v
+../src/adwranovsky__timer_0.2/rtl/timer.v

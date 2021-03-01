@@ -1,7 +1,26 @@
 `default_nettype none
 
+/*
+ * timer - A simple timer module
+ *
+ * Parameters:
+ *  WIDTH - The width of the internal counter that backs the timer
+ *
+ * Ports:
+ *  clk_i - The system clock
+ *  rst_i - An active high, synchronous reset
+ *  start_i - When high, the value of count_i is loaded and the module starts counting down
+ *  count_i - The amount of time to wait for when start_i goes high
+ *  done_o - Is high when the internal counter is expired and equals 0
+ *
+ * Description:
+ *  The number of clock cycles between start_i going high and done_o going high is the value loaded into count_i when
+ *  start_i goes high. Setting start_i high before done_i goes high will abort any previous operation and reload the
+ *  counter. Setting rst_i high is equivalent to setting start_i with count_i equal to 0.
+ */
 module timer #(
-    parameter WIDTH = 8
+    parameter WIDTH = 8,
+    parameter COVER = 0
 ) (
     input wire clk_i,
     input wire rst_i,
@@ -62,8 +81,10 @@ module timer #(
         assert(f_num_cycles == f_last_count-counter);
 
     // Make sure that the timer can run to completion
-    always @(*)
-        cover(f_timer_running && done_o);
+    generate if (COVER == 1) begin
+        always @(*)
+            cover(f_timer_running && done_o);
+    end endgenerate
 
     // Ensure that the timer is actively counting down if we've started it and it hasn't completed
     always @(*)
@@ -76,10 +97,10 @@ module timer #(
             assert(counter == 0);
 
     // Generate a testbench that runs the timer for 25 cycles
-    generate if (WIDTH >= 5)
+    generate if (COVER == 1 && WIDTH >= 5) begin
         always @(*)
             cover(f_num_cycles==25 && done_o);
-    endgenerate
+    end endgenerate
 `endif
 
 endmodule

@@ -1,6 +1,6 @@
 CAPI=2:
 
-name: adwranovsky::timer:0.1
+name: adwranovsky::timer:0.2
 
 filesets:
     rtl:
@@ -50,3 +50,15 @@ targets:
         tools:
             symbiyosys:
                 tasknames: [cover]
+
+parameters:
+    WIDTH:
+        datatype: int
+        default: 8
+        description: The timer bit width
+        paramtype: vlogparam
+    COVER:
+        datatype: int
+        default: 0
+        description: If set to 1, cover properties for formal verification are included
+        paramtype: vlogparam
