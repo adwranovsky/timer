@@ -5,6 +5,7 @@
  *
  * Parameters:
  *  WIDTH - The width of the internal counter that backs the timer
+ *  COVER - For testing use only. Set to 1 to include cover properties during formal verification
  *
  * Ports:
  *  clk_i - The system clock
